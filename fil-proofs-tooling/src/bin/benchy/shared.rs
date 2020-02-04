@@ -70,10 +70,13 @@ pub fn create_piece(piece_bytes: UnpaddedBytesAmount) -> (NamedTempFile, PieceIn
 pub fn create_replicas(
     sector_size: SectorSize,
     qty_sectors: usize,
+    only_add: bool,
 ) -> (
     PoRepConfig,
-    Vec<(SectorId, PreCommitReplicaOutput)>,
-    FuncMeasurement<Vec<SealPreCommitOutput>>,
+    Option<(
+        Vec<(SectorId, PreCommitReplicaOutput)>,
+        FuncMeasurement<Vec<SealPreCommitOutput>>,
+    )>,
 ) {
     info!("creating replicas: {:?} - {}", sector_size, qty_sectors);
     let sector_size_unpadded_bytes_ammount =
@@ -136,6 +139,10 @@ pub fn create_replicas(
             &[],
         )
         .unwrap();
+    }
+
+    if only_add {
+        return (porep_config, None);
     }
 
     let seal_pre_commit_outputs = measure(|| {
@@ -209,5 +216,5 @@ pub fn create_replicas(
         ));
     }
 
-    (porep_config, out, seal_pre_commit_outputs)
+    (porep_config, Some((out, seal_pre_commit_outputs)))
 }

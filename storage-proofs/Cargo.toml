@@ -30,7 +30,6 @@ aes = "0.3"
 block-modes = "0.3"
 sha2 = { git = "https://github.com/dignifiedquire/hashes", branch = "sha2-intrinsics" }
 pbr = "1.0"
-tempfile = "3"
 fs2 = "0.4"
 rayon = "1.0.0"
 serde = { version = "1.0", features = ["derive"]}
@@ -69,6 +68,8 @@ profile = ["measurements"]
 proptest = "0.7"
 criterion = "0.3"
 femme = "1.2.0"
+tempfile = "3"
+
 
 [[bench]]
 name = "pedersen"
