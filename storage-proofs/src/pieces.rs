@@ -54,10 +54,14 @@ pub fn generate_piece_commitment_bytes_from_source<H: Hasher>(
     let mut buf = [0; NODE_SIZE];
 
     let parts = (padded_piece_size as f64 / NODE_SIZE as f64).ceil() as usize;
+    println!("parts: {}", parts);
+    println!("padded_piece_size: {}", padded_piece_size);
 
-    let tree = MerkleTree::<H::Domain, H::Function>::try_from_iter((0..parts).map(|_| {
+    let tree = MerkleTree::<H::Domain, H::Function>::try_from_iter((0..parts).map(|i| {
+        println!("reading piece {}", i);
         source.read_exact(&mut buf)?;
-        <H::Domain as Domain>::try_from_bytes(&buf)
+        println!("{:?}", &buf);
+        <H::Domain as Domain>::try_from_bytes(&buf).context("invalid Fr element")
     }))
     .context("failed to build tree")?;
 
