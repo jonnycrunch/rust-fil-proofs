@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{ensure, Context, Result};
 use merkletree::store::{StoreConfig, DEFAULT_CACHED_ABOVE_BASE_LAYER};
+use rayon::prelude::*;
 use storage_proofs::drgraph::DefaultTreeHasher;
 use storage_proofs::hasher::{HashFunction, Hasher};
 use storage_proofs::measurements::{measure_op, Operation};
@@ -250,11 +251,11 @@ impl<R: Read> CommitmentReader<R> {
         let mut current_row = current_tree;
 
         while current_row.len() > 1 {
-            let mut next_row = Vec::with_capacity(current_row.len() / 2);
-            for chunk in current_row.chunks_exact(2) {
-                let hash = crate::pieces::piece_hash(chunk[0].as_ref(), chunk[1].as_ref());
-                next_row.push(hash);
-            }
+            let next_row = current_row
+                .par_chunks(2)
+                .map(|chunk| crate::pieces::piece_hash(chunk[0].as_ref(), chunk[1].as_ref()))
+                .collect::<Vec<_>>();
+
             current_row = next_row;
         }
         debug_assert_eq!(current_row.len(), 1);
